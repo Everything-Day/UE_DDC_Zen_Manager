@@ -15,8 +15,10 @@
     <Description>Unreal Engine Derived Data Cache Manager</Description>
 
     <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>false</SelfContained>
+    <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
