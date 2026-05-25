@@ -1,0 +1,215 @@
+<Window x:Class="UE_DDC_Manager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="虚幻引擎 DDC、Zen 缓存管理工具"
+        Width="760" Height="970"
+        MinWidth="650" MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/icon.ico"
+        Background="#f5f5f5">
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock x:Name="TxtHeaderTitle" Text="虚幻引擎 DDC、Zen 缓存管理工具" FontSize="20" FontWeight="Bold" Foreground="#1a1a2e"/>
+                <TextBlock x:Name="TxtHeaderSubtitle" Text="一键修改 Derived Data Cache 存储位置，释放系统盘空间"
+                           FontSize="12" Foreground="#666" Margin="0,4,0,0"/>
+            </StackPanel>
+            <Button x:Name="BtnLangToggle" Grid.Column="1" Content="CN/EN"
+                    VerticalAlignment="Top" Padding="10,5"
+                    FontSize="11" Cursor="Hand"
+                    Background="#e0e0e0" BorderBrush="#bbb" BorderThickness="1"
+                    Click="BtnLangToggle_Click"/>
+        </Grid>
+
+        <!-- Module 1: Engine path -->
+        <GroupBox x:Name="GrpModule1" Grid.Row="1" Header="模块一：引擎版本检测" Padding="10" Margin="0,0,0,8">
+            <StackPanel>
+                <TextBlock x:Name="TxtEnginePathLabel" Text="指定虚幻引擎安装根目录：" FontSize="12" Margin="0,0,0,6"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TxtEnginePath" Style="{StaticResource PathTextBox}"
+                             Text="" Grid.Column="0"/>
+                    <Button x:Name="BtnBrowseEngine" Content="浏览..." Grid.Column="1"
+                            Style="{StaticResource BrowseButton}" Margin="8,0,0,0"
+                            Click="BtnBrowseEngine_Click"/>
+                    <Button x:Name="BtnScan" Content="扫描引擎" Grid.Column="2"
+                            Style="{StaticResource ActionButton}" Margin="8,0,0,0"
+                            Click="BtnScan_Click"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Engine version list -->
+        <GroupBox x:Name="GrpEngineList" Grid.Row="2" Header="检测到的引擎版本（勾选需要修改的版本）" Padding="10" Margin="0,0,0,8">
+            <Grid Height="140">
+                <ListView x:Name="LvEngines" BorderThickness="0"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="4,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Column="0" Grid.RowSpan="2"
+                                          IsChecked="{Binding IsSelected}"
+                                          VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <TextBlock Grid.Column="1" Grid.Row="0"
+                                           Text="{Binding DisplayName}"
+                                           FontWeight="SemiBold" FontSize="13"/>
+                                <TextBlock Grid.Column="1" Grid.Row="1"
+                                           Text="{Binding InstallPath}"
+                                           Foreground="#888" FontSize="11"/>
+                                <TextBlock Grid.Column="2" Grid.Row="0" Grid.RowSpan="2"
+                                           VerticalAlignment="Center" FontSize="11"
+                                           Foreground="#666">
+                                    <Run Text="当前DDC: "/>
+                                    <Run Text="{Binding CurrentDDCPath, Mode=OneWay}" Foreground="#0078d4"/>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <TextBlock x:Name="TxtNoEngines" Text="未检测到引擎版本。请指定路径后点击【扫描引擎】。"
+                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Foreground="#999" FontSize="12"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- Module 2: New cache path -->
+        <GroupBox x:Name="GrpModule2" Grid.Row="3" Header="模块二：指定新缓存位置" Padding="10" Margin="0,0,0,8">
+            <StackPanel>
+                <TextBlock x:Name="TxtCachePathLabel" Text="选择新的 DDC 存储目录（同时控制 Local DDC 和 Zen Server）：" FontSize="12" Margin="0,0,0,6"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TxtNewCachePath" Style="{StaticResource PathTextBox}"
+                             Text="" Grid.Column="0"/>
+                    <Button x:Name="BtnBrowseCache" Content="浏览文件夹..." Grid.Column="1"
+                            Style="{StaticResource BrowseButton}" Margin="8,0,0,0"
+                            Click="BtnBrowseCache_Click"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Advanced: Shared DDC -->
+        <GroupBox x:Name="GrpSharedDDC" Grid.Row="4" Header="高级选项：Shared DDC（团队共享缓存）" Padding="10" Margin="0,0,0,8">
+            <StackPanel>
+                <CheckBox x:Name="ChkSharedDDC" Content="同时设置 Shared DDC 路径（UE-SharedDataCachePath）"
+                          FontSize="12" Margin="0,0,0,6"/>
+                <Grid x:Name="PnlSharedDDC" IsEnabled="False">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TxtSharedDDCPath" Style="{StaticResource PathTextBox}"
+                             Text="" Grid.Column="0"/>
+                    <Button x:Name="BtnBrowseShared" Content="浏览文件夹..." Grid.Column="1"
+                            Style="{StaticResource BrowseButton}" Margin="8,0,0,0"
+                            Click="BtnBrowseShared_Click"/>
+                </Grid>
+                <TextBlock x:Name="TxtSharedDDCDesc" Text="Shared DDC 用于团队内共享编译后的派生数据，可加速团队成员首次加载。个人开发者通常无需设置。"
+                           FontSize="11" Foreground="#888" Margin="0,6,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Module 3: Modify method -->
+        <GroupBox x:Name="GrpMethod" Grid.Row="5" Header="模块三：修改方式" Padding="10" Margin="0,0,0,8">
+            <StackPanel>
+                <RadioButton x:Name="RbEnvVar" Content="方式一：设置用户环境变量（推荐 — 全局生效，无需修改配置文件）"
+                             IsChecked="True" Margin="0,0,0,4" FontSize="12"/>
+                <RadioButton x:Name="RbConfigFile" Content="方式二：修改 BaseEngine.ini 配置文件（仅对选中的引擎版本生效）"
+                             Margin="0,0,0,4" FontSize="12"/>
+                <RadioButton x:Name="RbBoth" Content="方式三：两种方式同时应用（双重保险）" FontSize="12"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Current env variable status -->
+        <Border Grid.Row="6" Background="#e8f4fd" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+            <StackPanel>
+                <TextBlock x:Name="TxtEnvStatusTitle" Text="当前环境变量状态" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock x:Name="TxtEnvLocalLabel" Text="UE-LocalDataCachePath：" FontSize="12" VerticalAlignment="Center" Width="185"/>
+                    <TextBlock x:Name="TxtCurrentEnvVar" FontSize="12" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Foreground="#0078d4"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock x:Name="TxtEnvSharedLabel" Text="UE-SharedDataCachePath：" FontSize="12" VerticalAlignment="Center" Width="185"/>
+                    <TextBlock x:Name="TxtCurrentSharedVar" FontSize="12" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Foreground="#0078d4"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <Button x:Name="BtnRemoveEnvVar" Content="移除缓存环境变量" FontSize="11"
+                            Padding="8,4" Cursor="Hand"
+                            Click="BtnRemoveEnvVar_Click" Visibility="Collapsed"/>
+                    <Button x:Name="BtnRemoveSharedVar" Content="移除 Shared DDC 变量" FontSize="11"
+                            Padding="8,4" Cursor="Hand" Margin="8,0,0,0"
+                            Click="BtnRemoveSharedVar_Click" Visibility="Collapsed"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Clean cache section -->
+        <Border Grid.Row="7" Background="#fff3e0" CornerRadius="4" Padding="10" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtCleanTitle" Text="清理默认缓存" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="TxtCacheInfo" FontSize="11" Foreground="#666" TextWrapping="Wrap"
+                               Text="删除系统盘上的默认 Local DDC 和 Zen Server 缓存数据。引擎下次启动会自动重新生成。"/>
+                </StackPanel>
+                <Button x:Name="BtnCleanCache" Content="清理旧缓存" Grid.Column="1"
+                        Style="{StaticResource DangerButton}" Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        Click="BtnCleanCache_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Execute button -->
+        <Grid Grid.Row="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BtnSelectAll" Content="全选/取消全选" Grid.Column="0"
+                    Style="{StaticResource BrowseButton}" HorizontalAlignment="Left"
+                    Click="BtnSelectAll_Click"/>
+            <Button x:Name="BtnExecute" Content="一键修改缓存位置" Grid.Column="2"
+                    Style="{StaticResource ActionButton}" FontSize="15" Padding="28,12"
+                    Click="BtnExecute_Click"/>
+        </Grid>
+    </Grid>
+</Window>
